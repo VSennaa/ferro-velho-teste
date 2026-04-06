@@ -5,7 +5,7 @@ from django.db import transaction
 from django.contrib.admin.views.decorators import staff_member_required
 from decimal import Decimal
 from collections import defaultdict
-
+from django.contrib import messages
 from .models import Material, Operacao, ItemOperacao
 from .forms import MaterialForm, ItemOperacaoForm
 
@@ -38,7 +38,7 @@ def material_edit(request, pk):
 @staff_member_required
 def dashboard(request):
     capital_total = Operacao.objects.aggregate(total=Sum('valor_total'))['total'] or 0
-    operacoes = Operacao.objects.all().order_by('-data_criacao')
+    operacoes = Operacao.objects.all().order_by('-data_criacao').prefetch_related('itens__material')
     
     # Agrupar materiais por categoria e somar pesos
     resumo = []
@@ -62,6 +62,7 @@ def dashboard(request):
 # Aba de Operação (PDV)
 @staff_member_required
 def operacao_pdv(request):
+    # Inicializa a sessão se não existir
     if 'current_operacao_items' not in request.session:
         request.session['current_operacao_items'] = []
     
@@ -71,12 +72,14 @@ def operacao_pdv(request):
     if request.method == 'POST':
         action = request.POST.get('action')
 
-        if action == 'add_item':
+        # AÇÃO 1: ADICIONAR ITEM (Bate com o HTML 'adicionar')
+        if action == 'adicionar':
             form = ItemOperacaoForm(request.POST)
             if form.is_valid():
                 material = form.cleaned_data['material']
                 peso_kg = form.cleaned_data['peso_kg']
                 subtotal = material.preco_por_kg * peso_kg
+                
                 item_data = {
                     'material_id': material.id,
                     'material_nome': material.nome,
@@ -84,20 +87,26 @@ def operacao_pdv(request):
                     'peso_kg': str(peso_kg),
                     'subtotal': str(subtotal),
                 }
+                
                 current_items.append(item_data)
                 request.session['current_operacao_items'] = current_items
-                total_acumulado = sum(Decimal(item['subtotal']) for item in current_items)
-                return JsonResponse({
-                    'status': 'success',
-                    'item': item_data,
-                    'total_acumulado': str(total_acumulado)
-                })
+                request.session.modified = True # O Pulo do Gato para forçar o salvamento
+                
+                messages.success(request, f"{peso_kg}kg de {material.nome} adicionado!")
+                return redirect('operacao_pdv') # Recarrega a página limpa
             else:
-                return JsonResponse({'status': 'error', 'errors': form.errors}, status=400)
+                messages.error(request, "Verifique os valores informados.")
 
-        elif action == 'close_compra':
+        # AÇÃO 2: FECHAR COMPRA (Bate com o HTML 'finalizar')
+        elif action == 'finalizar':
+            if not current_items:
+                messages.warning(request, "O carrinho está vazio!")
+                return redirect('operacao_pdv')
+            
+            observacao = request.POST.get('observacao', '')
+
             with transaction.atomic():
-                operacao = Operacao.objects.create(valor_total=total_acumulado)
+                operacao = Operacao.objects.create(valor_total=total_acumulado, observacao=observacao)
                 for item_data in current_items:
                     material = Material.objects.get(id=item_data['material_id'])
                     ItemOperacao.objects.create(
@@ -106,17 +115,21 @@ def operacao_pdv(request):
                         peso_kg=Decimal(item_data['peso_kg']),
                         subtotal=Decimal(item_data['subtotal'])
                     )
+                
+                # Esvazia o carrinho e salva a alteração
                 request.session['current_operacao_items'] = []
                 request.session.modified = True
-            return JsonResponse({'status': 'success', 'message': 'Compra fechada com sucesso!'})
+                
+            messages.success(request, "Compra fechada com sucesso!")
+            return redirect('dashboard') # Joga de volta pro início
     
+    # Se for GET (apenas abriu a tela)
     form = ItemOperacaoForm()
     return render(request, 'ferrovelho_app/operacao_pdv.html', {
         'form': form,
         'current_items': current_items,
         'total_acumulado': total_acumulado
     })
-
 @staff_member_required
 def deletar_operacao(request, pk):
     operacao = get_object_or_404(Operacao, pk=pk)

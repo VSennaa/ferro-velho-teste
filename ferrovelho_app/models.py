@@ -17,6 +17,7 @@ class Material(models.Model):
 class Operacao(models.Model):
     data_criacao = models.DateTimeField(default=timezone.now)
     valor_total = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    observacao = models.TextField(blank=True, null=True)
 
     def __str__(self):
         return f"Operação {self.id} - {self.data_criacao.strftime('%d/%m/%Y %H:%M')}"

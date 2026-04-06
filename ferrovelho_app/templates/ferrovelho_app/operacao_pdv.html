@@ -1,19 +1,21 @@
-{% extends 'ferrovelho_app/base.html' %}
-
-{% block content %}
+{% extends 'ferrovelho_app/base.html' %} {% block content %}
     <h1 class="mb-4">Aba de Operação (PDV)</h1>
 
     <div class="row">
         <div class="col-lg-6">
             <div class="card p-3 shadow-sm mb-4">
                 <h2>Adicionar Item</h2>
-                <form id="add-item-form">
+                <form id="add-item-form" method="POST">
                     {% csrf_token %}
                     {{ form.as_p }}
+                    
+                    <input type="hidden" name="action" value="adicionar">
+                    
                     <button type="submit" id="add-item-btn" class="btn btn-primary btn-lg w-100">Adicionar</button>
                 </form>
             </div>
         </div>
+
         <div class="col-lg-6">
             <h2>Itens da Operação</h2>
             <div class="table-responsive shadow-sm rounded">
@@ -34,6 +36,10 @@
                                 <td>{{ item.preco_por_kg|floatformat:2 }}</td>
                                 <td>{{ item.subtotal|floatformat:2 }}</td>
                             </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">Nenhum item adicionado ainda.</td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -43,12 +49,15 @@
                 <h4>Total: R$ <span id="total-value">{{ total_acumulado|floatformat:2 }}</span></h4>
             </div>
             
-            <button id="close-compra-btn" class="btn btn-success btn-lg w-100">Fechar Compra</button>
+            <form method="POST">
+                {% csrf_token %}
+                <textarea name="observacao" class="form-control mb-3" rows="2" placeholder="Observações da compra (opcional)"></textarea>
+                <input type="hidden" name="action" value="finalizar">
+                <button type="submit" id="close-compra-btn" class="btn btn-success btn-lg w-100">Fechar Compra</button>
+            </form>
+
             <div id="messages" class="mt-3"></div>
         </div>
     </div>
     
-    <script>
-        // ... (rest of script remains the same)
-    </script>
-{% endblock %}
+    {% endblock %}

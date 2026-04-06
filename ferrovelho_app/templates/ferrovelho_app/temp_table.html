@@ -1,0 +1,57 @@
+    <h2>Histórico de Operações</h2>
+    <table class="table table-dark table-striped mb-4">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Valor Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for op in operacoes %}
+            <tr>
+                <td>{{ op.data_criacao|date:"d/m/Y H:i" }}</td>
+                <td>R$ {{ op.valor_total|floatformat:2 }}</td>
+                <td>
+                    <!-- Botão para abrir o Modal -->
+                    <button type="button" class="btn btn-info btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalhes{{ op.pk }}">
+                        Detalhes
+                    </button>
+                    <a href="{% url 'deletar_operacao' op.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Deseja realmente deletar esta operação?')">Excluir</a>
+                </td>
+            </tr>
+
+            <!-- Modal -->
+            <div class="modal fade" id="modalDetalhes{{ op.pk }}" tabindex="-1" aria-labelledby="modalDetalhesLabel{{ op.pk }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content bg-dark text-white">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="modalDetalhesLabel{{ op.pk }}">Detalhes da Operação {{ op.pk }}</h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <table class="table table-sm table-dark">
+                                <thead>
+                                    <tr>
+                                        <th>Material</th>
+                                        <th>Peso (kg)</th>
+                                        <th>Subtotal (R$)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for item in op.itens.all %}
+                                    <tr>
+                                        <td>{{ item.material.nome }}</td>
+                                        <td>{{ item.peso_kg }}</td>
+                                        <td>{{ item.subtotal|floatformat:2 }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </tbody>
+    </table>
