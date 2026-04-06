@@ -3,6 +3,10 @@
 {% block content %}
     <h1 class="mb-4">Dashboard de Estoque</h1>
 
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <a href="{% url 'reset_estoque' %}" class="btn btn-danger" onclick="return confirm('Tem certeza que deseja resetar todo o estoque?')">Reset Global</a>
+    </div>
+
     <div class="card mb-4 bg-primary text-white">
         <div class="card-body">
             <h3>Capital Total Gasto</h3>
@@ -25,7 +29,29 @@
                         <tr><td>{{ mat.nome }}</td><td>{{ mat.total_peso|default:0|floatformat:2 }}</td></tr>
                     {% endfor %}
                 </tbody>
-            </table>
+    </table>
+{% endblock %}
+
         </div>
     {% endfor %}
-{% endblock %}
+    <h2>Histórico de Operações</h2>
+    <table class="table table-dark table-striped mb-4">
+        <thead>
+            <tr>
+                <th>Data</th>
+                <th>Valor Total</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for op in operacoes %}
+            <tr>
+                <td>{{ op.data_criacao|date:"d/m/Y H:i" }}</td>
+                <td>R$ {{ op.valor_total|floatformat:2 }}</td>
+                <td>
+                    <a href="{% url 'deletar_operacao' op.pk %}" class="btn btn-danger btn-sm" onclick="return confirm('Deseja realmente deletar esta operação?')">Excluir</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
