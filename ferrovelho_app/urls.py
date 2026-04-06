@@ -4,6 +4,8 @@ from . import views
 urlpatterns = [
     # 1. A Raiz do site (O Dashboard principal)
     path('', views.dashboard, name='dashboard'), 
+
+    path('dashboard/', views.dashboard),
     
     # 2. As rotas que você já tinha
     path('materials/', views.material_list_create, name='material_list_create'),
