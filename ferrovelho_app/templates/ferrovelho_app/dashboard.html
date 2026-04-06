@@ -14,7 +14,7 @@
         </div>
     </div>
 
-    <h2>Estoque por Tipo</h2>
+    <h2>Estoque por Categoria</h2>
     {% for grupo in resumo %}
         <div class="card mb-3">
             <div class="card-header bg-secondary">
@@ -29,11 +29,10 @@
                         <tr><td>{{ mat.nome }}</td><td>{{ mat.total_peso|default:0|floatformat:2 }}</td></tr>
                     {% endfor %}
                 </tbody>
-    </table>
-{% endblock %}
-
+            </table>
         </div>
     {% endfor %}
+
     <h2>Histórico de Operações</h2>
     <table class="table table-dark table-striped mb-4">
         <thead>
@@ -55,3 +54,4 @@
             {% endfor %}
         </tbody>
     </table>
+{% endblock %}
