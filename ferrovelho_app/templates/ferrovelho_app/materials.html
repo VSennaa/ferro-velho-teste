@@ -22,7 +22,7 @@
             <thead>
                 <tr>
                     <th>Nome</th>
-                    <th>Tipo</th>
+                    <th>Categoria</th>
                     <th>Preço/kg (R$)</th>
                     <th>Ações</th>
                 </tr>
@@ -31,7 +31,7 @@
                 {% for material in materials %}
                     <tr>
                         <td>{{ material.nome }}</td>
-                        <td>{{ material.tipo }}</td>
+                        <td>{{ material.categoria }}</td>
                         <td>{{ material.preco_por_kg|floatformat:2 }}</td>
                         <td>
                             <a href="{% url 'material_edit' material.pk %}" class="btn btn-warning btn-sm">Editar</a>
