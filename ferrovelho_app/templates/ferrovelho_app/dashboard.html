@@ -1,0 +1,31 @@
+{% extends 'ferrovelho_app/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">Dashboard de Estoque</h1>
+
+    <div class="card mb-4 bg-primary text-white">
+        <div class="card-body">
+            <h3>Capital Total Gasto</h3>
+            <p class="display-6">R$ {{ capital_total|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <h2>Estoque por Tipo</h2>
+    {% for grupo in resumo %}
+        <div class="card mb-3">
+            <div class="card-header bg-secondary">
+                <h5>{{ grupo.tipo }} - Subtotal: {{ grupo.subtotal|floatformat:2 }} kg</h5>
+            </div>
+            <table class="table table-dark table-striped">
+                <thead>
+                    <tr><th>Material</th><th>Peso Total (kg)</th></tr>
+                </thead>
+                <tbody>
+                    {% for mat in grupo.materiais %}
+                        <tr><td>{{ mat.nome }}</td><td>{{ mat.total_peso|default:0|floatformat:2 }}</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endfor %}
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'ferrovelho_app/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">Aba de Operação (PDV)</h1>
+
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card p-3 shadow-sm mb-4">
+                <h2>Adicionar Item</h2>
+                <form id="add-item-form">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" id="add-item-btn" class="btn btn-primary btn-lg w-100">Adicionar</button>
+                </form>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <h2>Itens da Operação</h2>
+            <div class="table-responsive shadow-sm rounded">
+                <table id="item-list" class="table table-dark table-striped mb-0">
+                    <thead>
+                        <tr>
+                            <th>Material</th>
+                            <th>Peso (kg)</th>
+                            <th>Preço/kg</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in current_items %}
+                            <tr>
+                                <td>{{ item.material_nome }}</td>
+                                <td>{{ item.peso_kg }}</td>
+                                <td>{{ item.preco_por_kg|floatformat:2 }}</td>
+                                <td>{{ item.subtotal|floatformat:2 }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="alert alert-info mt-3 text-end">
+                <h4>Total: R$ <span id="total-value">{{ total_acumulado|floatformat:2 }}</span></h4>
+            </div>
+            
+            <button id="close-compra-btn" class="btn btn-success btn-lg w-100">Fechar Compra</button>
+            <div id="messages" class="mt-3"></div>
+        </div>
+    </div>
+    
+    <script>
+        // ... (rest of script remains the same)
+    </script>
+{% endblock %}

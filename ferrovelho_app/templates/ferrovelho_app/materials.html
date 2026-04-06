@@ -1,0 +1,46 @@
+{% extends 'ferrovelho_app/base.html' %}
+
+{% block content %}
+    <h1 class="mb-4">Gestão de Materiais</h1>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card p-3 shadow-sm">
+                <h2>Cadastrar Material</h2>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary btn-lg w-100">Salvar Material</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <h2>Materiais Cadastrados</h2>
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-dark table-striped mb-0">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Tipo</th>
+                    <th>Preço/kg (R$)</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for material in materials %}
+                    <tr>
+                        <td>{{ material.nome }}</td>
+                        <td>{{ material.tipo }}</td>
+                        <td>{{ material.preco_por_kg|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'material_edit' material.pk %}" class="btn btn-warning btn-sm">Editar</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4">Nenhum material cadastrado ainda.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
